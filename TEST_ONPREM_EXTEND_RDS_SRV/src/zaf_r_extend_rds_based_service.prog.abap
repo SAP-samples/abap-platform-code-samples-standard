@@ -31,6 +31,7 @@ CLASS cl_sadl_based_segw_project DEFINITION .
     METHODS insert_sadl_xml_into_dpc
       IMPORTING
         !iv_sadl_xml                  TYPE string
+        iv_src_segw_project_name      TYPE string
       CHANGING
         generated_code_definition     TYPE rswsourcet
         generated_code_implementation TYPE rswsourcet
@@ -222,7 +223,7 @@ CLASS cl_sadl_based_segw_project IMPLEMENTATION.
 
     APPEND |   ro_dpc = cl_sadl_gw_dpc_factory=>create_for_sadl( iv_sadl_xml   = lv_sadl_xml | TO  generated_code_implementation  ##NO_TEXT.
     APPEND |          iv_timestamp         = co_gen_timestamp                                | TO  generated_code_implementation  ##NO_TEXT.
-    APPEND |          iv_uuid              = 'MM_PUR_CNTRL_CTR_MAINTAIN'                     | TO  generated_code_implementation  ##NO_TEXT.
+    APPEND |          iv_uuid              = CONV #( '{ iv_src_segw_project_name }' )        | TO  generated_code_implementation  ##NO_TEXT.
     APPEND |          io_context           = me->mo_context ).                               | TO  generated_code_implementation  ##NO_TEXT.
     APPEND |ENDMETHOD.| TO  generated_code_implementation  ##NO_TEXT.
 
@@ -257,21 +258,7 @@ CLASS cl_sadl_based_segw_project IMPLEMENTATION.
     DATA tab_name_entity TYPE string.
     DATA tab_name_entityset TYPE string.
     "DATA generated_types_definition TYPE rswsourcet  .
-*    APPEND | CLASS  dpc_ext_class  DEFINITION    | TO generated_code_definition ##NO_TEXT.
-*    APPEND | PROTECTED SECTION. | TO generated_code_definition ##NO_TEXT.
-*
-*    APPEND | CLASS dpc_ext_class IMPLEMENTATION.| TO generated_code_implementation ##NO_TEXT.
 
-*    LOOP AT  cds_view_names  INTO DATA(cds_view_name).
-*
-*      APPEND |types: | TO generated_code_definition ##NO_TEXT.
-*      APPEND |    begin of TS_{ cds_view_name }, | TO generated_code_definition ##NO_TEXT.
-*      APPEND |      include type { cds_view_name },   | TO generated_code_definition ##NO_TEXT.
-*      APPEND |    end of TS_{ cds_view_name } . | TO generated_code_definition ##NO_TEXT.
-*      APPEND |  types: | TO generated_code_definition ##NO_TEXT.
-*      APPEND |   TT_{ cds_view_name } type standard table of TS_{ cds_view_name } . | TO generated_code_definition ##NO_TEXT.
-*
-*    ENDLOOP.
 
     LOOP AT  cds_view_names  INTO DATA(cds_view_name).
       "leave 2 characters to generate a unique name '<...>_get_entityset'
@@ -300,22 +287,6 @@ CLASS cl_sadl_based_segw_project IMPLEMENTATION.
         tab_name_entityset = cds_view_name && tab_entityset_suffix.
         tab_name_entity = cds_view_name && tab_entity_suffix.
       ENDIF.
-
-*      APPEND |types: | TO generated_types_definition ##NO_TEXT.
-*      APPEND |    begin of { type_name_entity }, | TO generated_types_definition ##NO_TEXT.
-*      APPEND |      include type { cds_view_name },   | TO generated_types_definition ##NO_TEXT.
-*      APPEND |    end of { type_name_entity } . | TO generated_types_definition ##NO_TEXT.
-*      APPEND |  types: | TO generated_types_definition ##NO_TEXT.
-*      APPEND |   { type_name_entityset } type standard table of { type_name_entity } . | TO generated_types_definition ##NO_TEXT.
-
-
-*      APPEND |  types: | TO generated_types_definition ##NO_TEXT.
-*      APPEND |   { type_name_entity } type { mpc_class_name }=>TS_ "use code completion to select correct type from MPC . | TO generated_types_definition ##NO_TEXT.
-*
-*      APPEND |  types: | TO generated_types_definition ##NO_TEXT.
-*      APPEND |   { type_name_entityset } type { mpc_class_name }=>TT_ "use code completion to select correct type from MPC . | TO generated_types_definition ##NO_TEXT.
-
-
 
       APPEND |  METHODS { method_name_get_entity } | TO generated_code_definition ##NO_TEXT.
       APPEND |      IMPORTING | TO generated_code_definition ##NO_TEXT.
@@ -353,12 +324,6 @@ CLASS cl_sadl_based_segw_project IMPLEMENTATION.
 
 
     ENDLOOP.
-
-*    APPEND |         ENDCLASS . | TO generated_code_definition ##NO_TEXT.
-*    APPEND |         ENDCLASS . | TO generated_code_implementation ##NO_TEXT.
-
-*    APPEND LINES OF generated_code_definition TO ct_generated_code.
-*    APPEND LINES OF generated_code_implementation TO ct_generated_code.
 
 
   ENDMETHOD.
@@ -405,14 +370,6 @@ CLASS cl_sadl_based_segw_project IMPLEMENTATION.
 
       DATA(length_mandatory_name_comp) = strlen( mandatory_name_components ).
       DATA(remaining_num_characters) =  cds_view_name_length - length_mandatory_name_comp.
-
-*      IF strlen( cds_view_name ) > remaining_num_characters - suffix_length.
-*        method_name_get_entityset = substring( val = cds_view_name len =  remaining_num_characters - suffix_length ) && get_entityset_suffix.
-*        method_name_get_entity = substring( val = cds_view_name len =  remaining_num_characters - suffix_length ) && get_entity_suffix.
-*      ELSE.
-*        method_name_get_entityset = cds_view_name && get_entityset_suffix.
-*        method_name_get_entity = cds_view_name && get_entity_suffix.
-*      ENDIF.
 
 
       IF strlen( cds_view_name ) > remaining_num_characters - suffix_length.
@@ -496,12 +453,6 @@ CLASS cl_sadl_based_segw_project IMPLEMENTATION.
 
     APPEND LINES OF generated_code_get_entity TO generated_code_implementation.
     APPEND LINES OF generated_code_get_entityset TO generated_code_implementation.
-
-*    APPEND |         ENDCLASS . | TO generated_code_definition ##NO_TEXT.
-*    APPEND |         ENDCLASS . | TO generated_code_implementation ##NO_TEXT.
-
-*    APPEND LINES OF generated_code_definition TO ct_generated_code.
-*    APPEND LINES OF generated_code_implementation TO ct_generated_code.
 
 
   ENDMETHOD.
@@ -653,6 +604,7 @@ START-OF-SELECTION.
       extended_segw_project->insert_sadl_xml_into_dpc(
         EXPORTING
           iv_sadl_xml       = merged_sadl_xml
+          iv_src_segw_project_name = source_segw_project->get_segw_project_name(  )
         CHANGING
           generated_code_definition = generated_dpc_code_definition
           generated_code_implementation = generated_dpc_code_implement
