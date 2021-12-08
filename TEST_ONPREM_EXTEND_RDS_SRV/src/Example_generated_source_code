@@ -1,0 +1,218 @@
+CLASS ZCL_Z_REDEF_RDS_MPC_EXT DEFINITION
+PUBLIC
+INHERITING FROM ZCL_Z_REDEF_RDS_MPC
+CREATE PUBLIC .
+  PUBLIC SECTION.
+    METHODS define REDEFINITION.
+    METHODS if_sadl_gw_model_exposure_data~get_model_exposure REDEFINITION.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+CLASS ZCL_Z_REDEF_RDS_MPC_EXT IMPLEMENTATION.
+  METHOD define.
+    super->define( ).
+  ENDMETHOD.
+  METHOD if_sadl_gw_model_exposure_data~get_model_exposure.
+    CONSTANTS: co_gen_timestamp TYPE timestamp VALUE '20211208223150'.
+    DATA(lv_sadl_xml) =
+               |<?xml version="1.0" encoding="utf-16"?>|  &
+               |<sadl:definition xmlns:sadl="http://sap.com/sap.nw.f.sadl" syntaxVersion="V2" >|  &
+               | <sadl:dataSource type="CDS" name="SEPM_I_SALESORDERITEM_E" binding="SEPM_I_SALESORDERITEM_E" />|  &
+               | <sadl:dataSource type="CDS" name="SEPM_I_SALESORDER_E" binding="SEPM_I_SALESORDER_E" />|  &
+               |<sadl:dataSource type="CDS" name="I_CURRENCYTEXT" binding="I_CURRENCYTEXT" />|  &
+               | <sadl:dataSource type="CDS" name="ZI_CURRENCY" binding="ZI_CURRENCY" />|  &
+               |<sadl:resultSet>|  &
+               |<sadl:structure name="SEPM_I_SalesOrderItem_E" dataSource="SEPM_I_SALESORDERITEM_E" maxEditMode="RO" exposure="TRUE" >|  &
+               | <sadl:query name="SADL_QUERY">|  &
+               | </sadl:query>|  &
+               |</sadl:structure>|  &
+               |<sadl:structure name="SEPM_I_SalesOrder_E" dataSource="SEPM_I_SALESORDER_E" maxEditMode="RO" exposure="TRUE" >|  &
+               | <sadl:query name="SADL_QUERY">|  &
+               | </sadl:query>|  &
+               | <sadl:association name="TO_ITEM" binding="_ITEM" target="SEPM_I_SalesOrderItem_E" cardinality="zeroToMany" />|  &
+               |</sadl:structure>|  &
+               |<sadl:structure name="I_CurrencyText" dataSource="I_CURRENCYTEXT" maxEditMode="RO" exposure="TRUE" >|  &
+               | <sadl:query name="SADL_QUERY">|  &
+               | </sadl:query>|  &
+               |</sadl:structure>|  &
+               |<sadl:structure name="zI_currency" dataSource="ZI_CURRENCY" maxEditMode="RO" exposure="TRUE" >|  &
+               | <sadl:query name="SADL_QUERY">|  &
+               | </sadl:query>|  &
+               | <sadl:association name="TO_TEXT" binding="_TEXT" target="I_CurrencyText" cardinality="zeroToMany" />|  &
+               |</sadl:structure>|  &
+               |</sadl:resultSet>|  &
+               |</sadl:definition>| .
+    ro_model_exposure = cl_sadl_gw_model_exposure=>get_exposure_xml( iv_uuid      = CONV #( 'Z_SRC_RDS' )
+                                                                     iv_timestamp = co_gen_timestamp
+                                                                     iv_sadl_xml  = lv_sadl_xml ).
+  ENDMETHOD.
+ENDCLASS.
+**************************
+* DPC_EXT Code goes here *
+**************************
+ CLASS ZCL_Z_REDEF_RDS_DPC_EXT DEFINITION
+ PUBLIC
+ INHERITING FROM ZCL_Z_REDEF_RDS_DPC
+ CREATE PUBLIC .
+ PUBLIC SECTION.
+    METHODS if_sadl_gw_dpc_util~get_dpc REDEFINITION .
+ METHODS /iwbep/if_mgw_appl_srv_runtime~get_entityset REDEFINITION .
+ METHODS /iwbep/if_mgw_appl_srv_runtime~get_entity REDEFINITION .
+ PROTECTED SECTION.
+  METHODS I_CurrencyTex_get_entity
+      IMPORTING
+        !io_tech_request_context TYPE REF TO /iwbep/if_mgw_req_entity OPTIONAL
+      EXPORTING
+        !er_entity               TYPE ZCL_Z_REDEF_RDS_MPC=>TS_  "use code completion to select correct type from MPC .
+        !es_response_context     TYPE /iwbep/if_mgw_appl_srv_runtime=>ty_s_mgw_response_entity_cntxt
+      RAISING
+        /iwbep/cx_mgw_busi_exception
+        /iwbep/cx_mgw_tech_exception .
+     METHODS I_CurrencyTex_get_entityset
+       IMPORTING
+         !io_tech_request_context TYPE REF TO /iwbep/if_mgw_req_entityset OPTIONAL
+       EXPORTING
+         !et_entityset            TYPE  ZCL_Z_REDEF_RDS_MPC=>TT_  "use code completion to select correct type from MPC .
+         !es_response_context     TYPE /iwbep/if_mgw_appl_srv_runtime=>ty_s_mgw_response_context
+       RAISING
+         /iwbep/cx_mgw_busi_exception
+         /iwbep/cx_mgw_tech_exception .
+  METHODS zI_currency_get_entity
+      IMPORTING
+        !io_tech_request_context TYPE REF TO /iwbep/if_mgw_req_entity OPTIONAL
+      EXPORTING
+        !er_entity               TYPE ZCL_Z_REDEF_RDS_MPC=>TS_  "use code completion to select correct type from MPC .
+        !es_response_context     TYPE /iwbep/if_mgw_appl_srv_runtime=>ty_s_mgw_response_entity_cntxt
+      RAISING
+        /iwbep/cx_mgw_busi_exception
+        /iwbep/cx_mgw_tech_exception .
+     METHODS zI_currency_get_entityset
+       IMPORTING
+         !io_tech_request_context TYPE REF TO /iwbep/if_mgw_req_entityset OPTIONAL
+       EXPORTING
+         !et_entityset            TYPE  ZCL_Z_REDEF_RDS_MPC=>TT_  "use code completion to select correct type from MPC .
+         !es_response_context     TYPE /iwbep/if_mgw_appl_srv_runtime=>ty_s_mgw_response_context
+       RAISING
+         /iwbep/cx_mgw_busi_exception
+         /iwbep/cx_mgw_tech_exception .
+         ENDCLASS .
+ CLASS ZCL_Z_REDEF_RDS_DPC_EXT IMPLEMENTATION.
+ METHOD if_sadl_gw_dpc_util~get_dpc.
+    CONSTANTS: co_gen_timestamp TYPE timestamp VALUE '20211208223150'.
+    DATA(lv_sadl_xml) =
+               |<?xml version="1.0" encoding="utf-16"?>|  &
+               |<sadl:definition xmlns:sadl="http://sap.com/sap.nw.f.sadl" syntaxVersion="V2" >|  &
+               | <sadl:dataSource type="CDS" name="SEPM_I_SALESORDERITEM_E" binding="SEPM_I_SALESORDERITEM_E" />|  &
+               | <sadl:dataSource type="CDS" name="SEPM_I_SALESORDER_E" binding="SEPM_I_SALESORDER_E" />|  &
+               |<sadl:dataSource type="CDS" name="I_CURRENCYTEXT" binding="I_CURRENCYTEXT" />|  &
+               | <sadl:dataSource type="CDS" name="ZI_CURRENCY" binding="ZI_CURRENCY" />|  &
+               |<sadl:resultSet>|  &
+               |<sadl:structure name="SEPM_I_SalesOrderItem_E" dataSource="SEPM_I_SALESORDERITEM_E" maxEditMode="RO" exposure="TRUE" >|  &
+               | <sadl:query name="SADL_QUERY">|  &
+               | </sadl:query>|  &
+               |</sadl:structure>|  &
+               |<sadl:structure name="SEPM_I_SalesOrder_E" dataSource="SEPM_I_SALESORDER_E" maxEditMode="RO" exposure="TRUE" >|  &
+               | <sadl:query name="SADL_QUERY">|  &
+               | </sadl:query>|  &
+               | <sadl:association name="TO_ITEM" binding="_ITEM" target="SEPM_I_SalesOrderItem_E" cardinality="zeroToMany" />|  &
+               |</sadl:structure>|  &
+               |<sadl:structure name="I_CurrencyText" dataSource="I_CURRENCYTEXT" maxEditMode="RO" exposure="TRUE" >|  &
+               | <sadl:query name="SADL_QUERY">|  &
+               | </sadl:query>|  &
+               |</sadl:structure>|  &
+               |<sadl:structure name="zI_currency" dataSource="ZI_CURRENCY" maxEditMode="RO" exposure="TRUE" >|  &
+               | <sadl:query name="SADL_QUERY">|  &
+               | </sadl:query>|  &
+               | <sadl:association name="TO_TEXT" binding="_TEXT" target="I_CurrencyText" cardinality="zeroToMany" />|  &
+               |</sadl:structure>|  &
+               |</sadl:resultSet>|  &
+               |</sadl:definition>| .
+   ro_dpc = cl_sadl_gw_dpc_factory=>create_for_sadl( iv_sadl_xml   = lv_sadl_xml
+          iv_timestamp         = co_gen_timestamp
+          iv_uuid              = 'MM_PUR_CNTRL_CTR_MAINTAIN'
+          io_context           = me->mo_context ).
+ENDMETHOD.
+ METHOD /iwbep/if_mgw_appl_srv_runtime~get_entity.
+    DATA(my_entity_name) = io_tech_request_context->get_entity_set_name( ).
+    case io_tech_request_context->get_entity_set_name( ).
+WHEN 'I_CurrencyText'.
+ I_CurrencyTex_get_entity( EXPORTING io_tech_request_context = io_tech_request_context
+                                IMPORTING er_entity               = data(I_CurrencyTex_entity)
+                                  es_response_context     = es_response_context ).
+   IF I_CurrencyTex_entity IS NOT INITIAL.
+      copy_data_to_ref( EXPORTING is_data = I_CurrencyTex_entity
+                       CHANGING  cr_data = er_entity ).
+   ENDIF.
+WHEN 'zI_currency'.
+ zI_currency_get_entity( EXPORTING io_tech_request_context = io_tech_request_context
+                                IMPORTING er_entity               = data(zI_currency_entity)
+                                  es_response_context     = es_response_context ).
+   IF zI_currency_entity IS NOT INITIAL.
+      copy_data_to_ref( EXPORTING is_data = zI_currency_entity
+                       CHANGING  cr_data = er_entity ).
+   ENDIF.
+ WHEN OTHERS.
+    super->/iwbep/if_mgw_appl_srv_runtime~get_entity( EXPORTING iv_entity_name          = iv_entity_name
+                                                               iv_entity_set_name      = iv_entity_set_name
+                                                               iv_source_name          = iv_source_name
+                                                               it_key_tab              = it_key_tab
+                                                               it_navigation_path      = it_navigation_path
+                                                               io_tech_request_context = io_tech_request_context
+                                                      IMPORTING er_entity              = er_entity
+                                                                es_response_context    = es_response_context ).
+  ENDCASE.
+  ENDMETHOD.
+ METHOD /iwbep/if_mgw_appl_srv_runtime~get_entityset.
+    DATA(my_entity_name) = io_tech_request_context->get_entity_set_name( ).
+    case io_tech_request_context->get_entity_set_name( ).
+WHEN 'I_CurrencyText'.
+ I_CurrencyTex_get_entityset( EXPORTING io_tech_request_context = io_tech_request_context
+                                IMPORTING et_entityset               = data(I_CurrencyTex_entityset)
+                                  es_response_context     = es_response_context ).
+   IF I_CurrencyTex_entityset IS NOT INITIAL.
+      copy_data_to_ref( EXPORTING is_data = I_CurrencyTex_entityset
+                       CHANGING  cr_data = er_entityset ).
+   ENDIF.
+WHEN 'zI_currency'.
+ zI_currency_get_entityset( EXPORTING io_tech_request_context = io_tech_request_context
+                                IMPORTING et_entityset               = data(zI_currency_entityset)
+                                  es_response_context     = es_response_context ).
+   IF zI_currency_entityset IS NOT INITIAL.
+      copy_data_to_ref( EXPORTING is_data = zI_currency_entityset
+                       CHANGING  cr_data = er_entityset ).
+   ENDIF.
+  WHEN OTHERS.
+   super->/iwbep/if_mgw_appl_srv_runtime~get_entityset( EXPORTING iv_entity_name           = iv_entity_name
+                                                             iv_entity_set_name       = iv_entity_set_name
+                                                             iv_source_name           = iv_source_name
+                                                             it_filter_select_options = it_filter_select_options
+                                                             it_order                 = it_order
+                                                             is_paging                = is_paging
+                                                             it_key_tab               = it_key_tab
+                                                             it_navigation_path       = it_navigation_path
+                                                             iv_filter_string         = iv_filter_string
+                                                             iv_search_string         = iv_search_string
+                                                             io_tech_request_context  = io_tech_request_context
+                                                   IMPORTING er_entityset             = er_entityset
+                                                             es_response_context      = es_response_context ).
+  ENDCASE.
+  ENDMETHOD.
+ method I_CurrencyTex_get_entity.
+   if_sadl_gw_dpc_util~get_dpc( )->get_entity( EXPORTING io_tech_request_context = io_tech_request_context
+                                               IMPORTING es_data                 = er_entity ).
+ endmethod.
+ method I_CurrencyTex_get_entityset.
+    if_sadl_gw_dpc_util~get_dpc( )->get_entityset( EXPORTING io_tech_request_context = io_tech_request_context
+                                                   IMPORTING et_data                 = et_entityset
+                                                             es_response_context     = es_response_context ).
+  endmethod.
+ method zI_currency_get_entity.
+   if_sadl_gw_dpc_util~get_dpc( )->get_entity( EXPORTING io_tech_request_context = io_tech_request_context
+                                               IMPORTING es_data                 = er_entity ).
+ endmethod.
+ method zI_currency_get_entityset.
+    if_sadl_gw_dpc_util~get_dpc( )->get_entityset( EXPORTING io_tech_request_context = io_tech_request_context
+                                                   IMPORTING et_data                 = et_entityset
+                                                             es_response_context     = es_response_context ).
+  endmethod.
+         ENDCLASS .
