@@ -1,5 +1,7 @@
+[![REUSE status](https://api.reuse.software/badge/github.com/SAP-samples/abap-platform-code-samples-standard)](https://api.reuse.software/info/github.com/SAP-samples/abap-platform-code-samples-standard)
 # ABAP Platform Code Samples for on premise systems
 [![REUSE status](https://api.reuse.software/badge/github.com/SAP-samples/abap-platform-code-samples-standard)](https://api.reuse.software/info/github.com/SAP-samples/abap-platform-code-samples-standard)
+
 ## Description
 
 In this repository you will find several packages that contain the sample code of various blog posts.
