@@ -1,6 +1,6 @@
 [![REUSE status](https://api.reuse.software/badge/github.com/SAP-samples/abap-platform-code-samples-standard)](https://api.reuse.software/info/github.com/SAP-samples/abap-platform-code-samples-standard)
-# ABAP Platform Code Samples for on premise systems
-[![REUSE status](https://api.reuse.software/badge/github.com/SAP-samples/abap-platform-code-samples-standard)](https://api.reuse.software/info/github.com/SAP-samples/abap-platform-code-samples-standard)
+
+# ABAP Platform Code Samples for On-premise Systems
 
 ## Description
 
