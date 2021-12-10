@@ -12,7 +12,13 @@ CLASS cl_sadl_based_segw_project DEFINITION .
 
   PUBLIC SECTION.
 
-
+    TYPES:
+      BEGIN OF ts_mpc_type_of_cds_view,
+        cds_view_name               TYPE string,
+        mpc_get_entity_type_name    TYPE string,
+        mpc_get_entityset_type_name TYPE string,
+      END OF ts_mpc_type_of_cds_view,
+      tt_mpc_type_of_cds_view TYPE STANDARD TABLE OF ts_mpc_type_of_cds_view WITH EMPTY KEY.
 
     METHODS: constructor IMPORTING io_segw_project_name TYPE  /iwbep/i_sbd_ga-project
                          RAISING   cx_parameter_invalid,
@@ -27,6 +33,11 @@ CLASS cl_sadl_based_segw_project DEFINITION .
       get_mpc_class_name  RETURNING VALUE(class_name) TYPE string,
       get_segw_project_name  RETURNING VALUE(project_name) TYPE string.
     "methods A012345678901234567890123456789.
+
+    METHODS get_mpc_type_names
+      IMPORTING
+                i_cds_view_names                TYPE table_of_strings
+      RETURNING VALUE(r_mpc_types_of_cds_views) TYPE tt_mpc_type_of_cds_view.
 
     METHODS insert_sadl_xml_into_dpc
       IMPORTING
@@ -90,7 +101,6 @@ CLASS cl_sadl_based_segw_project IMPLEMENTATION.
   METHOD constructor.
 
     DATA:service_builder_dm_factory TYPE REF TO /iwbep/if_sbdm_factory,
-         service_builder_dm_project TYPE REF TO /iwbep/if_sbdm_project,
          service_builder_dm_manager TYPE REF TO /iwbep/if_sbdm_manager,
          lt_range                   TYPE /iwbep/if_sbdm_manager=>ty_t_range_prjct_name.
 
@@ -103,8 +113,6 @@ CLASS cl_sadl_based_segw_project IMPLEMENTATION.
                            option = 'EQ'
                            low =  segw_project_name
                         ) ).
-    DATA error_message_text TYPE string.
-
     READ TABLE service_builder_dm_manager->find_projects( lt_range ) INTO segw_project INDEX 1.
 
     IF sy-subrc NE 0.
@@ -259,9 +267,21 @@ CLASS cl_sadl_based_segw_project IMPLEMENTATION.
     DATA tab_name_entityset TYPE string.
     "DATA generated_types_definition TYPE rswsourcet  .
 
+    DATA(mpc_type_names) = get_mpc_type_names( cds_view_names ).
 
     LOOP AT  cds_view_names  INTO DATA(cds_view_name).
       "leave 2 characters to generate a unique name '<...>_get_entityset'
+
+      READ TABLE mpc_type_names INTO DATA(mpc_type_name) WITH KEY cds_view_name = cds_view_name.
+
+      IF sy-subrc = 0.
+        type_name_entity =  mpc_type_name-mpc_get_entity_type_name .
+        type_name_entityset = mpc_type_name-mpc_get_entityset_type_name .
+      ELSE.
+        type_name_entity = 'TS_' .
+        type_name_entityset = 'TT_' .
+      ENDIF.
+
 
       DATA(get_entityset_suffix) = '_get_entityset'.
       DATA(get_entity_suffix) = '_get_entity'.
@@ -275,15 +295,15 @@ CLASS cl_sadl_based_segw_project IMPLEMENTATION.
       IF strlen( cds_view_name ) > remaining_num_characters - suffix_length.
         method_name_get_entityset = substring( val = cds_view_name len =  remaining_num_characters - suffix_length ) && get_entityset_suffix.
         method_name_get_entity = substring( val = cds_view_name len =  remaining_num_characters - suffix_length ) && get_entity_suffix.
-        type_name_entity = 'TS_' && substring( val = cds_view_name len =  remaining_num_characters - suffix_length ) .
-        type_name_entityset = 'TT_' && substring( val = cds_view_name len =  remaining_num_characters - suffix_length ) .
+*        type_name_entity = 'TS_' && substring( val = cds_view_name len =  remaining_num_characters - suffix_length ) .
+*        type_name_entityset = 'TT_' && substring( val = cds_view_name len =  remaining_num_characters - suffix_length ) .
         tab_name_entityset = substring( val = cds_view_name len =  remaining_num_characters - suffix_length ) && tab_entityset_suffix.
         tab_name_entity = substring( val = cds_view_name len =  remaining_num_characters - suffix_length ) && tab_entity_suffix.
       ELSE.
         method_name_get_entityset = cds_view_name && get_entityset_suffix.
         method_name_get_entity = cds_view_name && get_entity_suffix.
-        type_name_entity = 'TS_' && cds_view_name.
-        type_name_entityset = 'TT_' && cds_view_name .
+*        type_name_entity = 'TS_' && cds_view_name.
+*        type_name_entityset = 'TT_' && cds_view_name .
         tab_name_entityset = cds_view_name && tab_entityset_suffix.
         tab_name_entity = cds_view_name && tab_entity_suffix.
       ENDIF.
@@ -292,7 +312,7 @@ CLASS cl_sadl_based_segw_project IMPLEMENTATION.
       APPEND |      IMPORTING | TO generated_code_definition ##NO_TEXT.
       APPEND |        !io_tech_request_context TYPE REF TO /iwbep/if_mgw_req_entity OPTIONAL | TO generated_code_definition ##NO_TEXT.
       APPEND |      EXPORTING | TO generated_code_definition ##NO_TEXT.
-      APPEND |        !er_entity               TYPE { mpc_class_name }=>TS_  "use code completion to select correct type from MPC . | TO generated_code_definition ##NO_TEXT.
+      APPEND |        !er_entity               TYPE { mpc_class_name }=>{ type_name_entity }  "use code completion to select correct type from MPC . | TO generated_code_definition ##NO_TEXT.
       APPEND |        !es_response_context     TYPE /iwbep/if_mgw_appl_srv_runtime=>ty_s_mgw_response_entity_cntxt | TO generated_code_definition ##NO_TEXT.
       APPEND |      RAISING | TO generated_code_definition ##NO_TEXT.
       APPEND |        /iwbep/cx_mgw_busi_exception | TO generated_code_definition ##NO_TEXT.
@@ -302,7 +322,7 @@ CLASS cl_sadl_based_segw_project IMPLEMENTATION.
       APPEND |       IMPORTING | TO generated_code_definition ##NO_TEXT.
       APPEND |         !io_tech_request_context TYPE REF TO /iwbep/if_mgw_req_entityset OPTIONAL | TO generated_code_definition ##NO_TEXT.
       APPEND |       EXPORTING | TO generated_code_definition ##NO_TEXT.
-      APPEND |         !et_entityset            TYPE  { mpc_class_name }=>TT_  "use code completion to select correct type from MPC .  | TO generated_code_definition ##NO_TEXT.
+      APPEND |         !et_entityset            TYPE  { mpc_class_name }=>{ type_name_entityset }  "use code completion to select correct type from MPC .  | TO generated_code_definition ##NO_TEXT.
       APPEND |         !es_response_context     TYPE /iwbep/if_mgw_appl_srv_runtime=>ty_s_mgw_response_context | TO generated_code_definition ##NO_TEXT.
       APPEND |       RAISING | TO generated_code_definition ##NO_TEXT.
       APPEND |         /iwbep/cx_mgw_busi_exception | TO generated_code_definition ##NO_TEXT.
@@ -332,8 +352,6 @@ CLASS cl_sadl_based_segw_project IMPLEMENTATION.
 
     DATA method_name_get_entityset TYPE string.
     DATA method_name_get_entity TYPE string.
-    DATA type_name_entity TYPE string.
-    DATA type_name_entityset TYPE string.
     DATA tab_name_entity TYPE string.
     DATA tab_name_entityset TYPE string.
 
@@ -344,11 +362,8 @@ CLASS cl_sadl_based_segw_project IMPLEMENTATION.
     DATA(tab_entity_suffix) = '_entity'.
 
 
-* APPEND | CLASS  dpc_ext_class  DEFINITION    | TO generated_code_definition ##NO_TEXT.
     APPEND | METHODS /iwbep/if_mgw_appl_srv_runtime~get_entityset REDEFINITION . | TO generated_code_definition ##NO_TEXT.
     APPEND | METHODS /iwbep/if_mgw_appl_srv_runtime~get_entity REDEFINITION . | TO generated_code_definition ##NO_TEXT.
-*
-*    APPEND | CLASS dpc_ext_class IMPLEMENTATION.| TO generated_code_implementation ##NO_TEXT.
 
     CLEAR generated_code_get_entityset.
     APPEND | METHOD /iwbep/if_mgw_appl_srv_runtime~get_entityset. | TO generated_code_get_entityset ##NO_TEXT.
@@ -375,15 +390,11 @@ CLASS cl_sadl_based_segw_project IMPLEMENTATION.
       IF strlen( cds_view_name ) > remaining_num_characters - suffix_length.
         method_name_get_entityset = substring( val = cds_view_name len =  remaining_num_characters - suffix_length ) && get_entityset_suffix.
         method_name_get_entity = substring( val = cds_view_name len =  remaining_num_characters - suffix_length ) && get_entity_suffix.
-        type_name_entity = 'TS_' && substring( val = cds_view_name len =  remaining_num_characters - suffix_length ) .
-        type_name_entityset = 'TT_' && substring( val = cds_view_name len =  remaining_num_characters - suffix_length ) .
         tab_name_entityset = substring( val = cds_view_name len =  remaining_num_characters - suffix_length ) && tab_entityset_suffix.
         tab_name_entity = substring( val = cds_view_name len =  remaining_num_characters - suffix_length ) && tab_entity_suffix.
       ELSE.
         method_name_get_entityset = cds_view_name && get_entityset_suffix.
         method_name_get_entity = cds_view_name && get_entity_suffix.
-        type_name_entity = 'TS_' && cds_view_name.
-        type_name_entityset = 'TT_' && cds_view_name .
         tab_name_entityset = cds_view_name && tab_entityset_suffix.
         tab_name_entity = cds_view_name && tab_entity_suffix.
       ENDIF.
@@ -391,30 +402,22 @@ CLASS cl_sadl_based_segw_project IMPLEMENTATION.
 
 
       APPEND |WHEN '{ cds_view_name }'.  |  TO generated_code_get_entityset ##NO_TEXT.
-
-      "APPEND |data { tab_name_entityset } type { type_name_entityset }.| TO generated_code_get_entityset ##NO_TEXT.
-
       APPEND | { method_name_get_entityset }( EXPORTING io_tech_request_context = io_tech_request_context | TO generated_code_get_entityset ##NO_TEXT.
       APPEND |                                IMPORTING et_entityset               = data({ tab_name_entityset }) | TO generated_code_get_entityset ##NO_TEXT.
       APPEND |                                  es_response_context     = es_response_context ). | TO generated_code_get_entityset ##NO_TEXT.
 
       APPEND |   IF { tab_name_entityset } IS NOT INITIAL.  | TO generated_code_get_entityset ##NO_TEXT.
-*     Send specific entity data to the caller interface
       APPEND |      copy_data_to_ref( EXPORTING is_data = { tab_name_entityset } |  TO generated_code_get_entityset ##NO_TEXT.
       APPEND |                       CHANGING  cr_data = er_entityset ).  | TO generated_code_get_entityset ##NO_TEXT.
       APPEND |   ENDIF. | TO generated_code_get_entityset ##NO_TEXT.
 
 
       APPEND |WHEN '{ cds_view_name }'.  |  TO generated_code_get_entity ##NO_TEXT.
-
-      "APPEND |data { tab_name_entity } type { type_name_entity }.| TO generated_code_get_entity ##NO_TEXT.
-
       APPEND | { method_name_get_entity }( EXPORTING io_tech_request_context = io_tech_request_context | TO generated_code_get_entity ##NO_TEXT.
       APPEND |                                IMPORTING er_entity               = data({ tab_name_entity }) | TO generated_code_get_entity ##NO_TEXT.
       APPEND |                                  es_response_context     = es_response_context ). | TO generated_code_get_entity ##NO_TEXT.
 
       APPEND |   IF { tab_name_entity } IS NOT INITIAL.  | TO generated_code_get_entity ##NO_TEXT.
-*     Send specific entity data to the caller interface
       APPEND |      copy_data_to_ref( EXPORTING is_data = { tab_name_entity } |  TO generated_code_get_entity ##NO_TEXT.
       APPEND |                       CHANGING  cr_data = er_entity ).  | TO generated_code_get_entity ##NO_TEXT.
       APPEND |   ENDIF. | TO generated_code_get_entity ##NO_TEXT.
@@ -527,6 +530,56 @@ CLASS cl_sadl_based_segw_project IMPLEMENTATION.
     project_name = segw_project_name.
   ENDMETHOD.
 
+  METHOD get_mpc_type_names.
+
+    DATA  et_type TYPE seoo_types_r  .
+    DATA result_tab TYPE match_result_tab.
+
+    et_type = cl_sadl_gw_gen_api_access=>get_instance( )->seo_type_read_all( VALUE #( clsname = mpc_class_name ) ).
+
+    LOOP AT i_cds_view_names INTO DATA(cds_view_name).
+
+
+
+      LOOP AT et_type INTO DATA(ls_type).
+
+        FIND ALL OCCURRENCES OF to_upper( cds_view_name ) IN
+                     ls_type-typesrc
+                     RESULTS result_tab.
+        IF result_tab IS NOT INITIAL.
+
+          LOOP AT result_tab INTO DATA(result).
+
+            DATA(cds_view_name_length) = strlen( cds_view_name ).
+            DATA(character_before) = substring( val = ls_type-typesrc off = result-offset - 1 len = 1 ).
+            DATA(character_after) = substring( val = ls_type-typesrc off = result-offset + result-length  len = 1 ).
+
+            IF character_after = '.'.
+              DATA(entity_type_name) = ls_type-cmpname.
+              DATA(search_get_entityset_type) = |type standard table of { ls_type-cmpname }|.
+            ENDIF.
+          ENDLOOP.
+        ENDIF.
+      ENDLOOP.
+      IF search_get_entityset_type IS NOT INITIAL.
+        LOOP AT et_type INTO ls_type.
+          FIND ALL OCCURRENCES OF search_get_entityset_type IN
+                 ls_type-typesrc
+                 RESULTS result_tab.
+          IF result_tab IS NOT INITIAL.
+            "out->write( ls_type-cmpname ).
+            DATA(entityset_type_name) = ls_type-cmpname.
+          ENDIF.
+        ENDLOOP.
+
+        APPEND VALUE #( cds_view_name = cds_view_name
+                        mpc_get_entity_type_name = entity_type_name
+                        mpc_get_entityset_type_name = entityset_type_name ) TO r_mpc_types_of_cds_views.
+      ENDIF.
+    ENDLOOP.
+
+  ENDMETHOD.
+
 ENDCLASS.
 
 START-OF-SELECTION.
@@ -535,26 +588,15 @@ START-OF-SELECTION.
               ext_proj TYPE /iwbep/i_sbd_ga-project.
 
 
-
-*data source_segw_project type REF TO cl_sadl_based_segw_project.
-*data extended_segw_project type REF TO cl_sadl_based_segw_project.
-
-  "todo zeitstempel von quell und zielsystem merken
-
-
-
-
   DATA filename TYPE string.
   DATA path_to_file TYPE string.
   DATA path_and_filename TYPE string.
   DATA useraction TYPE i.
   DATA gui_download_data TYPE TABLE OF string.
-  DATA generated_code TYPE rswsourcet .
   DATA generated_dpc_code_definition TYPE rswsourcet .
   DATA get_entity_and_set_definition TYPE rswsourcet .
   DATA generated_dpc_code_implement TYPE rswsourcet .
   DATA generated_types_definition TYPE rswsourcet .
-
   DATA generated_mpc_code_definition TYPE rswsourcet .
   DATA generated_mpc_code_implement TYPE rswsourcet .
 
@@ -562,9 +604,6 @@ START-OF-SELECTION.
 
       DATA(source_segw_project) = NEW cl_sadl_based_segw_project( src_proj ).
       DATA(extended_segw_project) = NEW cl_sadl_based_segw_project( ext_proj ).
-
-      "@todo: get name of DPC EXT Class from extended project
-      DATA(extended_dpc_ext_class_name) = 'EXTENDED_DPC_EXT'.
 
       TRY.
           DATA(sadl_xml_source_project) = source_segw_project->get_sadl_xml( ).
@@ -589,6 +628,7 @@ START-OF-SELECTION.
       WRITE : / |extended mpc_ext class name { extended_segw_project->get_mpc_ext_class_name(  ) }|.
       WRITE : / |extended dpc class name { extended_segw_project->get_dpc_class_name(  ) }|.
       WRITE : / |extended mpc class name { extended_segw_project->get_mpc_class_name(  ) }|.
+
       "generated_dpc_code_definition
 
       APPEND | CLASS { extended_segw_project->get_dpc_ext_class_name(  ) } DEFINITION    | TO generated_dpc_code_definition ##NO_TEXT.
