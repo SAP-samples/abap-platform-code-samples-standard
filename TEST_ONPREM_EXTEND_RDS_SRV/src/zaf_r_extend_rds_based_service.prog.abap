@@ -149,16 +149,16 @@ CLASS cl_sadl_based_segw_project IMPLEMENTATION.
 
   METHOD get_sadl_xml.
     DATA   lo_service_api TYPE REF TO cl_sadl_gw_service_api  .
-    TRY.
-        lo_service_api = cl_sadl_gw_service_api=>get_service_api( io_project = segw_project ).
-      CATCH /iwbep/cx_sbcm_exception.
-        "handle exception
-    ENDTRY.
-    TRY.
-        lo_service_api->get_and_update_sadl_xml( IMPORTING ev_sadl_xml = sadl_xml ).
-      CATCH /iwbep/cx_sbcm_exception.
-        "handle exception
-    ENDTRY.
+*    TRY.
+    lo_service_api = cl_sadl_gw_service_api=>get_service_api( io_project = segw_project ).
+*      CATCH /iwbep/cx_sbcm_exception.
+*        "handle exception
+*    ENDTRY.
+*    TRY.
+    lo_service_api->get_and_update_sadl_xml( IMPORTING ev_sadl_xml = sadl_xml ).
+*      CATCH /iwbep/cx_sbcm_exception.
+*        "handle exception
+*    ENDTRY.
     "lo_service_api->get_sadl( IMPORTING es_sadl = DATA(sadl_definition) ).
   ENDMETHOD.
 
@@ -599,19 +599,26 @@ START-OF-SELECTION.
   DATA generated_types_definition TYPE rswsourcet .
   DATA generated_mpc_code_definition TYPE rswsourcet .
   DATA generated_mpc_code_implement TYPE rswsourcet .
-
+  DATA exception_text TYPE string.
   TRY.
 
       DATA(source_segw_project) = NEW cl_sadl_based_segw_project( src_proj ).
       DATA(extended_segw_project) = NEW cl_sadl_based_segw_project( ext_proj ).
 
-      TRY.
-          DATA(sadl_xml_source_project) = source_segw_project->get_sadl_xml( ).
-          DATA(sadl_xml_extended_project) = extended_segw_project->get_sadl_xml( ).
-        CATCH /iwbep/cx_sbcm_exception INTO DATA(get_sadl_xml_exception).
-          WRITE: / |Exception occured: { get_sadl_xml_exception->get_text(  ) }|.
-          EXIT.
-      ENDTRY.
+*      TRY.
+      DATA(sadl_xml_source_project) = source_segw_project->get_sadl_xml( ).
+      DATA(sadl_xml_extended_project) = extended_segw_project->get_sadl_xml( ).
+*        CATCH /iwbep/cx_sbcm_exception INTO DATA(get_sadl_xml_exception).
+*          exception_text = get_sadl_xml_exception->get_text(  ).
+*          WRITE: / |Exception occured: { exception_text }|.
+*          EXIT.
+*        catch CX_SADL_GW_NO_SERVICE_API into data(no_service_api_exception).
+**        if no_service_api_exception->
+*
+*          exception_text = no_service_api_exception->get_text(  ).
+*          WRITE: / |Exception occured: { exception_text }|.
+*          EXIT.
+*      ENDTRY.
 
       DATA(merged_sadl_xml) = extended_segw_project->get_merged_sadl_xml(
                                 sadl_xml_source_project   = sadl_xml_source_project
@@ -751,8 +758,28 @@ START-OF-SELECTION.
         EXCEPTIONS
           OTHERS   = 24.
 
+    CATCH cx_sadl_gw_no_service_api INTO DATA(sadl_gw_no_service_api_exc).
+
+      IF sadl_gw_no_service_api_exc->cx_sadl_gw_no_service_api-msgno = '004'.
+        WRITE: / |Exception occured: { sadl_gw_no_service_api_exc->project_name } is not a RDS based SEGW project|.
+      ELSE.
+        WRITE: / |Exception occured: { sadl_gw_no_service_api_exc->get_longtext(  ) } |.
+      ENDIF.
+      
     CATCH cx_root INTO DATA(sadl_merge_exception).
 
-      WRITE: / |Exception occured: { sadl_merge_exception->get_text(  ) }|.
+      DATA(root_exception) = cl_message_helper=>get_latest_t100_exception( sadl_merge_exception ).
+
+      DATA(message_id) = root_exception->t100key-msgid.
+      DATA(message_no) =  root_exception->t100key-msgno.
+      DATA(attribute_1) = root_exception->t100key-attr1.
+      DATA(attribute_2) = root_exception->t100key-attr2.
+      DATA(attribute_3) = root_exception->t100key-attr3.
+      DATA(attribute_4) = root_exception->t100key-attr4.
+
+      DATA(root_exception_text) = root_exception->if_message~get_longtext( ).
+
+      WRITE: / |message_id { message_id } message_no { message_no } |.
+      WRITE: / |Exception occured: { root_exception_text }|.
 
   ENDTRY.
