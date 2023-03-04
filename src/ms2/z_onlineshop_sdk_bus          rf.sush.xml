@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_SUSH" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <HEAD>
+    <NAME>Z_ONLINESHOP_SDK_BUS</NAME>
+    <TYPE>RF</TYPE>
+    <DISPLAY_NAME>Z_ONLINESHOP_SDK_BUS</DISPLAY_NAME>
+    <STEXT>bus</STEXT>
+    <MODIFIER>BPINST</MODIFIER>
+    <MODDATE>2023-02-09</MODDATE>
+    <MODTIME>16:11:43</MODTIME>
+    <SRCSYSTEM>S4H</SRCSYSTEM>
+    <AUTHOR>BPINST</AUTHOR>
+    <DEVCLASS>ZMS2</DEVCLASS>
+   </HEAD>
+   <USOBX>
+    <USOBX>
+     <NAME>Z_ONLINESHOP_SDK_BUS</NAME>
+     <TYPE>RF</TYPE>
+     <OBJECT>S_RFC</OBJECT>
+     <MODIFIER>BPINST</MODIFIER>
+     <MODDATE>2023-02-09</MODDATE>
+     <MODTIME>16:11:43</MODTIME>
+     <OKFLAG>X</OKFLAG>
+    </USOBX>
+   </USOBX>
+   <USOBX_EXT>
+    <item>
+     <OBJECT>S_RFC</OBJECT>
+     <TTEXT>Authorization Check for RFC Access</TTEXT>
+     <OCLSS>AAAB</OCLSS>
+     <MODIFIER>BPINST</MODIFIER>
+     <MODDATE>2023-02-09</MODDATE>
+     <MODTIME>16:11:43</MODTIME>
+     <OKFLAG>X</OKFLAG>
+     <DEVCLASS>SRCX</DEVCLASS>
+     <PS_POSID>BC-MID-RFC</PS_POSID>
+     <CI_TEXT>Check</CI_TEXT>
+     <CH_TEXT>Check</CH_TEXT>
+     <PR_TEXT>No</PR_TEXT>
+     <EXCEP>3</EXCEP>
+     <EXCEP_TX>Okay</EXCEP_TX>
+     <EXCEP_ICON>@08@</EXCEP_ICON>
+    </item>
+   </USOBX_EXT>
+  </asx:values>
+ </asx:abap>
+</abapGit>
