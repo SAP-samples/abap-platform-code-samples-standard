@@ -16,9 +16,12 @@ In this repository you will find several packages that contain the sample code o
 
 ## Requirements
 
-This sample code can be deployed on a SAP S/4HANA system.   
-You have to create a package `ZABAP_STANDARD` beforehand in software component `HOME` without specifing a super package. 
+This sample code can be deployed on a SAP S/4HANA system in packages that have the *ABAP language version*: **Standard ABAP**.  
+
+You have to create a package (e.g. `ZABAP_STANDARD`) beforehand in software component `HOME` without specifing a super package. 
 The code for each blog post / workshop is stored in a separate sub-package (for example `ZMS2`) of the super package `ZABAP_STANDARD`.  
+
+The repository uses folder logic **FULL**. That means that the content can only be imported into packages that have exactly the same name.  
 
 ## Download and Installation
 
