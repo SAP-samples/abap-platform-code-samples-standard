@@ -6,9 +6,13 @@
 
 In this repository you will find several packages that contain the sample code of various blog posts.
 
+### ABAP Cloud integration with Microsoft
+
+
+
 ### How to generate RAP BOs with custom entities  
 * Blog Post: [How to redefine RDS based OData services ?](https://blogs.sap.com/2021/12/08/how-to-redefine-rds-based-odata-services/)  
-* [Source code](../../tree/main/src/rap_gen_cust_ent)
+
 
 ## Requirements
 
