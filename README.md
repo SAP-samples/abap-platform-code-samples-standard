@@ -13,16 +13,16 @@ In this repository you will find several packages that contain the sample code o
 ## Requirements
 
 This sample code can be deployed on a SAP S/4HANA system.   
-You have to create a package `TEST_ABAP` beforehand in `$TMP`. 
-The code for each blog post is stored in a separate sub-package (for example `TEST_ONPREM_EXTEND_RDS_SRV`) of the super package `TEST_ONPREM`.  
+You have to create a package `TEST_ABAP_STANDARD` beforehand in software component `LOCAL` without specifing a super package. 
+The code for each blog post / workshop is stored in a separate sub-package (for example `TEST_ABAP_STANDARD_MS2`) of the super package `TEST_ABAP_STANDARD`.  
 
 ## Download and Installation
 
-You can download this code and import it into an ABAP environment system using the report ZABAPGIT. Please be sure to have a package `TEST_ONPREM` in `$TMP`created beforehand.
+You can download this code and import it into an ABAP environment system using the report ZABAPGIT. Please be sure to have a package `TEST_ABAP_STANDARD` in the software component `LOCAL` without specifing a super package created beforehand.
 
 ## Known Issues
 
-When you try to import this repository into a ABAP environment trial systems it might happen that this import does not run smoothly if another user has already performed an import.
+none
 
 ## How to obtain support
 
