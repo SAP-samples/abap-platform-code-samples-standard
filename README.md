@@ -17,12 +17,12 @@ In this repository you will find several packages that contain the sample code o
 ## Requirements
 
 This sample code can be deployed on a SAP S/4HANA system.   
-You have to create a package `TEST_ABAP_STANDARD` beforehand in software component `LOCAL` without specifing a super package. 
-The code for each blog post / workshop is stored in a separate sub-package (for example `TEST_ABAP_STANDARD_MS2`) of the super package `TEST_ABAP_STANDARD`.  
+You have to create a package `ZABAP_STANDARD` beforehand in software component `HOME` without specifing a super package. 
+The code for each blog post / workshop is stored in a separate sub-package (for example `ZMS2`) of the super package `ZABAP_STANDARD`.  
 
 ## Download and Installation
 
-You can download this code and import it into an ABAP environment system using the report ZABAPGIT. Please be sure to have a package `TEST_ABAP_STANDARD` in the software component `LOCAL` without specifing a super package created beforehand.
+You can download this code and import it into an ABAP environment system using the report ZABAPGIT. Please be sure to have a package (e.g. `ZABAP_STANDARD` ) in the software component `HOME` without specifing a super package created beforehand.
 
 ## Known Issues
 
